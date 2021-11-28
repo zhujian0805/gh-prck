@@ -11,34 +11,22 @@ fi
 REPOINFO=$(gh repo view --json owner,name |jq -r '.name,.owner.login')
 
 LAST=$(gh pr list --limit 1 --state all --json number|jq '.[].number')
+#LAST=2
 
-# Snippets to help get started:
+if [ x == ${LAST}x ]
+then
+    echo "There is no open pull request, specify one PR number to show!"
+    exit
+fi
 
-# Determine if an executable is in the PATH
-# if ! type -p ruby >/dev/null; then
-#   echo "Ruby not found on the system" >&2
-#   exit 1
-# fi
+get_review_ids () {
+    gh api repos/$(echo $REPOINFO|awk '{print $2}')/$(echo $REPOINFO|awk '{print $1}')/pulls/${LAST:-2}/reviews|jq '.[].id'
+}
 
-# Pass arguments through to another command
-# gh issue list "$@" -R cli/cli
 
-# Using the gh api command to retrieve and format information
-# QUERY='
-#   query($endCursor: String) {
-#     viewer {
-#       repositories(first: 100, after: $endCursor) {
-#         nodes {
-#           nameWithOwner
-#           stargazerCount
-#         }
-#       }
-#     }
-#   }
-# '
-# TEMPLATE='
-#   {{- range $repo := .data.viewer.repositories.nodes -}}
-#     {{- printf "name: %s - stargazers: %v\n" $repo.nameWithOwner $repo.stargazerCount -}}
-#   {{- end -}}
-# '
-# exec gh api graphql -f query="${QUERY}" --paginate --template="${TEMPLATE}"
+for id in $(get_review_ids)
+do
+    gh api repos/$(echo $REPOINFO|awk '{print $2}')/$(echo $REPOINFO|awk '{print $1}')/pulls/${LAST:-2}/reviews/${id}|jq -r '.user.login, "---------------------",.body'
+    gh api repos/$(echo $REPOINFO|awk '{print $2}')/$(echo $REPOINFO|awk '{print $1}')/pulls/${LAST:-2}/reviews/${id}/comments|jq -r '.[].body'
+    echo
+done
