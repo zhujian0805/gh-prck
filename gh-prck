@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+
+OPSNUM=${#}
+number=
+prlimit=
+number_set=
+limit_set=
+lnumber=
+
+show_help() {
+  cat <<-EOF
+This extension helps you to check pull requests details.
+
+USAGE
+  $ gh prck [flags]
+
+FLAGS
+  -n    The pull Request number to view
+  -l    Maximum number of items to fetch (default 30)
+  -h    Show this help
+
+EXAMPLES
+  $ gh prck
+  $ gh prck -n 233
+EOF
+}
+
+while getopts "n:hl:" Option
+do
+  case $Option in
+    n) number=$OPTARG;
+         number_set=yes;;
+    h) show_help;
+         exit;;
+    l)
+        prlimit=$OPTARG;
+        limit_set=yes;;
+    *  ) :;
+         exit;;
+  esac
+done
+
+shift $(($OPTIND - 1))
+
+template1='
+{{- tablerow (printf "%v" "PR Number") (printf "%v" "Author") (printf "%v" "State") (printf "%v" "MergedBy") (printf "%v" "Reviews") (printf "%v" "PR Title") -}}
+{{- range $pr := .data.repository.pullRequests.nodes -}}
+{{ if .mergedBy }}
+{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" .state) (printf "%v" .mergedBy.login ) (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
+{{ else }}
+{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" .state) (printf "%v" "NotYetMerged") (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
+{{ end }}
+{{- end -}}
+'
+template2='
+{{- tablerow (printf "%q" .data.repository.pullRequest.author.login) "" -}}
+{{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
+{{ if .data.repository.pullRequest.title  }}
+{{- tablerow (printf "%q" .data.repository.pullRequest.title) "" -}}
+{{- tablerow (printf "%q" "\n") "" -}}
+{{ end }}
+{{ if .data.repository.pullRequest.bodyText -}}
+{{- tablerow (printf "%q" .data.repository.pullRequest.bodyText) "" -}}
+{{- tablerow (printf "%q" "\n") "" -}}
+{{ end }}
+{{- range $rv := .data.repository.pullRequest.reviews.nodes -}} {{ tablerender }}
+{{printf "%q" (print .author.login "::" .state)}}
+{{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
+{{ if ne (len .bodyText) 0 }}
+    {{- tablerow (printf "%q" .bodyText) "" -}}
+{{ end }}
+{{- range $cm := .comments.nodes -}}
+{{- tablerow (printf "%q" .bodyText) "" -}}
+{{- end -}}
+{{- tablerow (printf "%q" "") "" -}}
+{{- end -}}
+{{- range $comments := .data.repository.pullRequest.comments.nodes -}}
+{{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
+{{- tablerow (printf "%q" .bodyText) "" -}}
+{{- tablerow (printf "%q" "\n") "" -}}
+{{- end -}}
+'
+
+query='
+query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequests(last: $limit) {
+      nodes {
+        state
+        author {
+          login
+        }
+        mergedBy {
+          login
+        }
+        id
+        number
+        title
+        reviews {
+          totalCount
+        }
+      }
+    }
+    id
+    createdAt
+    pullRequest(number: $prnumber) {
+      title
+      bodyText
+      author {
+        login
+      }
+      comments(last: 10) {
+        totalCount
+        nodes {
+          bodyText
+          author {
+            login
+          }
+        }
+      }
+      reviews(last: 10) {
+        nodes {
+          state
+          author {
+            login
+          }
+          bodyText
+          comments(last: 10) {
+            nodes {
+              bodyText
+            }
+            totalCount
+          }
+        }
+      }
+    }
+  }
+}'
+
+if [ ! -d .git ]
+then
+    echo "The current directory is not a git repository!"
+    exit
+fi
+
+REPOINFO=$(gh repo view --json owner,name |jq -r '.name,.owner.login')
+OWNER=$(echo $REPOINFO|awk '{print $2}')
+REPO=$(echo $REPOINFO|awk '{print $1}')
+
+lnumber=$(gh pr list --limit 1 --state all --json number|jq '.[].number')
+
+if [ -z $lnumber ]
+then
+    echo "There is no pull Requests created so far for this repository!"
+    exit
+fi
+
+if [ -z $number ]
+then
+    number=$lnumber
+fi
+number=$(echo $number|sed 's/#//g')
+
+if [ $OPSNUM -eq 0  ]
+then
+    gh api graphql -F limit=${prlimit:-10} -F owner="$OWNER" -F name="$REPO" -F prnumber=${number} -f query="$query" --template="$template1"
+    exit
+fi
+
+if [ ! -z $prlimit ]
+then
+    gh api graphql -F limit=${prlimit:-10} -F owner="$OWNER" -F name="$REPO" -F prnumber=${number} -f query="$query" --template="$template1"
+fi
+
+if [ ! -z ${number_set} ]
+then
+    gh api graphql -F limit=${prlimit:-10} -F owner="$OWNER" -F name="$REPO" -F prnumber=${number} -f query="$query" --template="$template2"|jq -r
+fi
