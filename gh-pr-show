@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
-set -e
 
-echo "Hello gh-pr-show!"
+echo "Welcome to use gh-pr-show!"
+
+if [ ! -d .git ]
+then
+    echo "The current directory is not a git repository!"
+    exit
+fi
+
+REPOINFO=$(gh repo view --json owner,name |jq -r '.name,.owner.login')
 
 # Snippets to help get started:
 
