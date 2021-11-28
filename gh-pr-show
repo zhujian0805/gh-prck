@@ -10,6 +10,8 @@ fi
 
 REPOINFO=$(gh repo view --json owner,name |jq -r '.name,.owner.login')
 
+LAST=$(gh pr list --limit 1 --state all --json number|jq '.[].number')
+
 # Snippets to help get started:
 
 # Determine if an executable is in the PATH
