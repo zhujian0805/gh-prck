@@ -7,24 +7,27 @@ then
 fi
 
 REPOINFO=$(gh repo view --json owner,name |jq -r '.name,.owner.login')
+OWNER=$(echo $REPOINFO|awk '{print $2}')
+REPO=$(echo $REPOINFO|awk '{print $1}')
 
-LAST=$(gh pr list --limit 1 --state all --json number|jq '.[].number')
-#LAST=2
+#LAST=$(gh pr list --limit 1 --state all --json number|jq '.[].number')
+LAST=2
 
-if [ x == ${LAST}x ]
-then
-    echo "There is no open pull request, specify one PR number to show!"
-    exit
-fi
+template='
+{{- range $pr := .data.repository.pullRequests.nodes -}}
+{{- tablerow (printf "%v" .number) (printf "%v" .title| autocolor "green") -}}
+{{- end -}}
 
-get_review_ids () {
-    gh api repos/$(echo $REPOINFO|awk '{print $2}')/$(echo $REPOINFO|awk '{print $1}')/pulls/${LAST:-2}/reviews|jq '.[].id'
-}
+{{ if eq (len .data.repository.pullRequests.nodes) 0 }}
+{{- printf "No pull requests match your filter" -}}
+{{ else }}
+{{- tablerender -}}
+{{ end }}
+'
 
-
-gh api graphql -f query='
-{
-  repository(owner: "terraform-alibabacloud-roles", name: "cf_network_base") {
+query='
+query ($owner: String!, $name: String!, $prlast: Int!) {
+  repository(owner: $owner, name: $name) {
     pullRequests(last: 10) {
       nodes {
         id
@@ -34,7 +37,7 @@ gh api graphql -f query='
     }
     id
     createdAt
-    pullRequest(number: 2) {
+    pullRequest(number: $prlast) {
       reviews(last: 10) {
         nodes {
           author {
@@ -52,3 +55,9 @@ gh api graphql -f query='
     }
   }
 }'
+
+gh api graphql -F owner="$OWNER" -F name="$REPO" -F prlast=${LAST} -f query="$query" --template="$template"
+
+
+
+
