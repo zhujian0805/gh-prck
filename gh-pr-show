@@ -6,23 +6,35 @@ then
     exit
 fi
 
+LAST=$(gh pr list --limit 1 --state all --json number|jq '.[].number')
+
+while getopts ":l:" Option
+do
+  case $Option in
+    l  ) LAST=$OPTARG;;
+  esac
+done
+
+shift $(($OPTIND - 1))
+
 REPOINFO=$(gh repo view --json owner,name |jq -r '.name,.owner.login')
 OWNER=$(echo $REPOINFO|awk '{print $2}')
 REPO=$(echo $REPOINFO|awk '{print $1}')
 
-#LAST=$(gh pr list --limit 1 --state all --json number|jq '.[].number')
-LAST=2
 
-template='
+template1='
 {{- range $pr := .data.repository.pullRequests.nodes -}}
-{{- tablerow (printf "%v" .number) (printf "%v" .title| autocolor "green") -}}
+  {{- tablerow (printf "%v" .number) (printf "%v" .title| autocolor "green") -}}
 {{- end -}}
-
-{{ if eq (len .data.repository.pullRequests.nodes) 0 }}
-{{- printf "No pull requests match your filter" -}}
-{{ else }}
-{{- tablerender -}}
-{{ end }}
+'
+template2='
+{{- range $rv := .data.repository.pullRequest.reviews.nodes -}}
+{{- tablerow (printf "%v" .author.login) -}}
+{{- tablerow (printf "%v" .bodyText) -}}
+{{- range $cm := .comments.nodes -}}
+{{- tablerow (printf "%v" .bodyText) -}}
+{{- end -}}
+{{- end -}}
 '
 
 query='
@@ -56,7 +68,9 @@ query ($owner: String!, $name: String!, $prlast: Int!) {
   }
 }'
 
-gh api graphql -F owner="$OWNER" -F name="$REPO" -F prlast=${LAST} -f query="$query" --template="$template"
+gh api graphql -F owner="$OWNER" -F name="$REPO" -F prlast=${LAST} -f query="$query" --template="$template1"
+
+gh api graphql -F owner="$OWNER" -F name="$REPO" -F prlast=${LAST} -f query="$query" --template="$template2"
 
 
 
