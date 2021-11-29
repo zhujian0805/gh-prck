@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-echo "Welcome to use gh-pr-show!"
-
 if [ ! -d .git ]
 then
     echo "The current directory is not a git repository!"
@@ -24,9 +22,33 @@ get_review_ids () {
 }
 
 
-for id in $(get_review_ids)
-do
-    gh api repos/$(echo $REPOINFO|awk '{print $2}')/$(echo $REPOINFO|awk '{print $1}')/pulls/${LAST:-2}/reviews/${id}|jq -r '.user.login, "---------------------",.body'
-    gh api repos/$(echo $REPOINFO|awk '{print $2}')/$(echo $REPOINFO|awk '{print $1}')/pulls/${LAST:-2}/reviews/${id}/comments|jq -r '.[].body'
-    echo
-done
+gh api graphql -f query='
+{
+  repository(owner: "terraform-alibabacloud-roles", name: "cf_network_base") {
+    pullRequests(last: 10) {
+      nodes {
+        id
+        number
+        title
+      }
+    }
+    id
+    createdAt
+    pullRequest(number: 2) {
+      reviews(last: 10) {
+        nodes {
+          author {
+            login
+          }
+          bodyText
+          comments(last: 10) {
+            nodes {
+              bodyText
+            }
+            totalCount
+          }
+        }
+      }
+    }
+  }
+}'
