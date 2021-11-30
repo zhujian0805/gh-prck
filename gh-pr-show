@@ -8,6 +8,8 @@ fi
 
 LAST=$(gh pr list --limit 1 --state all --json number|jq '.[].number')
 
+OPSNUM=$#
+
 while getopts ":l:" Option
 do
   case $Option in
@@ -29,10 +31,10 @@ template1='
 '
 template2='
 {{- range $rv := .data.repository.pullRequest.reviews.nodes -}}
-{{- tablerow (printf "%v" .author.login) -}}
-{{- tablerow (printf "%v" .bodyText) -}}
+{{- tablerow (printf "%q%q" "\n" .author.login) (printf "%q" "-----------") -}}
+{{- tablerow (printf "%q" .bodyText) -}}
 {{- range $cm := .comments.nodes -}}
-{{- tablerow (printf "%v" .bodyText) -}}
+{{- tablerow (printf "%q" .bodyText) -}}
 {{- end -}}
 {{- end -}}
 '
@@ -68,10 +70,16 @@ query ($owner: String!, $name: String!, $prlast: Int!) {
   }
 }'
 
-gh api graphql -F owner="$OWNER" -F name="$REPO" -F prlast=${LAST} -f query="$query" --template="$template1"
+if [ $OPSNUM -eq 0  ]
+then
+    gh api graphql -F owner="$OWNER" -F name="$REPO" -F prlast=${LAST} -f query="$query" --template="$template1"
+    exit
+fi
 
-gh api graphql -F owner="$OWNER" -F name="$REPO" -F prlast=${LAST} -f query="$query" --template="$template2"
-
+if [ -n $LAST ]
+then
+    gh api graphql -F owner="$OWNER" -F name="$REPO" -F prlast=${LAST} -f query="$query" --template="$template2"|jq -r
+fi
 
 
 
