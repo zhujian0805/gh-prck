@@ -15,9 +15,9 @@ USAGE
   $ gh pr-details [flags]
 
 FLAGS
-  -n, --number              The PR number to view
-  -l, --limit               The limit of PR to show
-  -h, --help                Show help
+  -n    The PR number to view
+  -l    The limit of PR to show
+  -h    Show help
 
 EXAMPLES
   $ gh pr-details
@@ -28,11 +28,11 @@ EOF
 while getopts "n:hl:" Option
 do
   case $Option in
-    n  ) number=$OPTARG;
+    n) number=$OPTARG;
          number_set=yes;;
-    h  ) show_help;
+    h) show_help;
          exit;;
-    l|--limit )
+    l)
         prlimit=$OPTARG;
         limit_set=yes;;
     *  ) :;
