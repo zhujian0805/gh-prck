@@ -43,12 +43,12 @@ done
 shift $(($OPTIND - 1))
 
 template1='
-{{- tablerow (printf "%v" "PR Number") (printf "%v" "Author") (printf "%v" "MergedBy") (printf "%v" "Reviews") (printf "%v" "PR Title") -}}
+{{- tablerow (printf "%v" "PR Number") (printf "%v" "Author") (printf "%v" "State") (printf "%v" "MergedBy") (printf "%v" "Reviews") (printf "%v" "PR Title") -}}
 {{- range $pr := .data.repository.pullRequests.nodes -}}
 {{ if .mergedBy }}
-{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" .mergedBy.login ) (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
+{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" .state) (printf "%v" .mergedBy.login ) (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
 {{ else }}
-{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" "NotYetMerged") (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
+{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" .state) (printf "%v" "NotYetMerged") (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
 {{ end }}
 {{- end -}}
 '
@@ -86,6 +86,7 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
   repository(owner: $owner, name: $name) {
     pullRequests(last: $limit) {
       nodes {
+        state
         author {
           login
         }
