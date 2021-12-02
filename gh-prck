@@ -15,9 +15,9 @@ USAGE
   $ gh prck [flags]
 
 FLAGS
-  -n    The PR number to view
-  -l    The limit of PR to show
-  -h    Show help
+  -n    The pull Request number to view
+  -l    Maximum number of items to fetch (default 30)
+  -h    Show this help
 
 EXAMPLES
   $ gh prck
