@@ -12,7 +12,7 @@ show_help() {
 This extension helps you to check pull requests details.
 
 USAGE
-  $ gh pr-details [flags]
+  $ gh prck [flags]
 
 FLAGS
   -n    The PR number to view
@@ -20,8 +20,8 @@ FLAGS
   -h    Show help
 
 EXAMPLES
-  $ gh pr-details
-  $ gh pr-details -n 233
+  $ gh prck
+  $ gh prck -n 233
 EOF
 }
 
