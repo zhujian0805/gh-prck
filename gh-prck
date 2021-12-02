@@ -53,31 +53,31 @@ template1='
 {{- end -}}
 '
 template2='
-{{- tablerow (printf "%q" .data.repository.pullRequest.author.login) -}}
-{{- tablerow (printf "%q" "---------------------------------------------------------------------------") -}}
+{{- tablerow (printf "%q" .data.repository.pullRequest.author.login) "" -}}
+{{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
 {{ if .data.repository.pullRequest.title  }}
-{{- tablerow (printf "%q" .data.repository.pullRequest.title) -}}
-{{- tablerow (printf "%q" "\n") -}}
+{{- tablerow (printf "%q" .data.repository.pullRequest.title) "" -}}
+{{- tablerow (printf "%q" "\n") "" -}}
 {{ end }}
 {{ if .data.repository.pullRequest.bodyText -}}
-{{- tablerow (printf "%q" .data.repository.pullRequest.bodyText) -}}
-{{- tablerow (printf "%q" "\n") -}}
+{{- tablerow (printf "%q" .data.repository.pullRequest.bodyText) "" -}}
+{{- tablerow (printf "%q" "\n") "" -}}
 {{ end }}
 {{- range $rv := .data.repository.pullRequest.reviews.nodes -}}
-{{- tablerow (printf "%q" .author.login) -}}
-{{- tablerow (printf "%q" "---------------------------------------------------------------------------") -}}
+{{- tablerow (printf "%q" .author.login) (printf "%q" .state) }}
+{{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
 {{ if ne (len .bodyText) 0 }}
-    {{- tablerow (printf "%q" .bodyText) -}}
+    {{- tablerow (printf "%q" .bodyText) "" -}}
 {{ end }}
 {{- range $cm := .comments.nodes -}}
-{{- tablerow (printf "%q" .bodyText) -}}
+{{- tablerow (printf "%q" .bodyText) "" -}}
 {{- end -}}
-{{- tablerow (printf "%q" "") -}}
+{{- tablerow (printf "%q" "") "" -}}
 {{- end -}}
 {{- range $comments := .data.repository.pullRequest.comments.nodes -}}
-{{- tablerow (printf "%q" "---------------------------------------------------------------------------") -}}
-{{- tablerow (printf "%q" .bodyText) -}}
-{{- tablerow (printf "%q" "\n") -}}
+{{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
+{{- tablerow (printf "%q" .bodyText) "" -}}
+{{- tablerow (printf "%q" "\n") "" -}}
 {{- end -}}
 '
 
