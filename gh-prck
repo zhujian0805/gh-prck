@@ -75,7 +75,6 @@ template2='
 {{- tablerow (printf "%q" "") -}}
 {{- end -}}
 {{- range $comments := .data.repository.pullRequest.comments.nodes -}}
-{{- tablerow (printf "%q" .author.login) -}}
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") -}}
 {{- tablerow (printf "%q" .bodyText) -}}
 {{- tablerow (printf "%q" "\n") -}}
@@ -120,6 +119,7 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
       }
       reviews(last: 10) {
         nodes {
+          state
           author {
             login
           }
