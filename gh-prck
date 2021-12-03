@@ -46,7 +46,7 @@ template1='
 {{- tablerow (printf "%v" "PR Number") (printf "%v" "Author") (printf "%v" "State") (printf "%v" "MergedBy") (printf "%v" "Reviews") (printf "%v" "PR Title") -}}
 {{- range $pr := .data.repository.pullRequests.nodes -}}
 {{ if .mergedBy }}
-{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" .state) (printf "%v" .mergedBy.login ) (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
+{{- tablerow (printf "%v" .number|autocolor "red+bh") (printf "%v" .author.login|autocolor "blue+bh") (printf "%v" .state|autocolor "yellow+B") (printf "%v" .mergedBy.login ) (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
 {{ else }}
 {{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" .state) (printf "%v" "NotYetMerged") (printf "%v" .reviews.totalCount) (printf "%v" .title| autocolor "green") -}}
 {{ end }}
