@@ -63,8 +63,8 @@ template2='
 {{- tablerow (printf "%q" .data.repository.pullRequest.bodyText) "" -}}
 {{- tablerow (printf "%q" "\n") "" -}}
 {{ end }}
-{{- range $rv := .data.repository.pullRequest.reviews.nodes -}}
-{{- tablerow (printf "%q" .author.login) (printf "%q" .state) -}}
+{{- range $rv := .data.repository.pullRequest.reviews.nodes -}} {{ tablerender }}
+{{printf "%q" (print .author.login "::" .state)}}
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
 {{ if ne (len .bodyText) 0 }}
     {{- tablerow (printf "%q" .bodyText) "" -}}
