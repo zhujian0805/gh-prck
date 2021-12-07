@@ -57,7 +57,7 @@ template2='
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
 {{ if .data.repository.pullRequest.title  }}
 {{- tablerow (printf "%q" .data.repository.pullRequest.title) "" -}}
-{{- tablerow (printf "%q" "\n") "" -}}
+{{- tablerow (printf "%q" "") "" -}}
 {{ end }}
 {{ if .data.repository.pullRequest.bodyText -}}
 {{- tablerow (printf "%q" .data.repository.pullRequest.bodyText) "" -}}
