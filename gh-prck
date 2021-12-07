@@ -53,7 +53,7 @@ template1='
 {{- end -}}
 '
 template2='
-{{- tablerow (printf "%q" .data.repository.pullRequest.author.login) "" -}}
+{{- tablerow (printf "%q" (print "Author:" .data.repository.pullRequest.author.login)) "" -}}
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
 {{ if .data.repository.pullRequest.title  }}
 {{- tablerow (printf "%q" .data.repository.pullRequest.title) "" -}}
