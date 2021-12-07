@@ -63,6 +63,14 @@ template2='
 {{- tablerow (printf "%q" .data.repository.pullRequest.bodyText) "" -}}
 {{- tablerow (printf "%q" "\n") "" -}}
 {{ end }}
+
+{{- tablerow (printf "%q" "Commits") "" -}}
+{{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
+{{- range $cm := .data.repository.pullRequest.commits.nodes -}}
+{{- tablerow (printf "%q" .commit.message) "" -}}
+{{ end }}
+{{- tablerow (printf "%q" "\n") "" -}}
+
 {{- range $rv := .data.repository.pullRequest.reviews.nodes -}} {{ tablerender }}
 {{printf "%q" (print .author.login "::" .state)}}
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
@@ -104,12 +112,21 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
     id
     createdAt
     pullRequest(number: $prnumber) {
+       commits (last:30) {
+        totalCount
+        nodes {
+          id
+          commit {
+            message
+          }
+        }
+      }
       title
       bodyText
       author {
         login
       }
-      comments(last: 10) {
+      comments(last: 30) {
         totalCount
         nodes {
           bodyText
@@ -118,14 +135,14 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
           }
         }
       }
-      reviews(last: 10) {
+      reviews(last: 30) {
         nodes {
           state
           author {
             login
           }
           bodyText
-          comments(last: 10) {
+          comments(last: 30) {
             nodes {
               bodyText
             }
