@@ -88,6 +88,7 @@ template2='
 {{- tablerow (printf "%q" "") "" -}}
 {{- end -}}
 {{- range $comments := .data.repository.pullRequest.comments.nodes -}}
+{{- tablerow (printf "%q" (print .author.login "::Commented")) -}}
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
 {{- tablerow (printf "%q" .bodyText) "" -}}
 {{- tablerow (printf "%q" "\n") "" -}}
