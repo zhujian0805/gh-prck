@@ -101,6 +101,11 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
   repository(owner: $owner, name: $name) {
     pullRequests(last: $limit) {
       nodes {
+        suggestedReviewers {
+          reviewer {
+            name
+          }
+        }
         comments {
           totalCount
         }
@@ -125,6 +130,11 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
     id
     createdAt
     pullRequest(number: $prnumber) {
+      suggestedReviewers {
+        reviewer {
+          name
+        }
+      }
       state
       mergedBy {
         login
