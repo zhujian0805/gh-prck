@@ -53,7 +53,7 @@ template1='
 {{- end -}}
 '
 template2='
-{{- tablerow (printf "%q" (print "Author:" .data.repository.pullRequest.author.login)) "" -}}
+{{- tablerow (printf "%q" (print "****** " "Author" "::" .data.repository.pullRequest.author.login " ******")) "" -}}
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
 {{ if .data.repository.pullRequest.title  }}
 {{- tablerow (printf "%q" .data.repository.pullRequest.title) "" -}}
@@ -93,6 +93,7 @@ template2='
 {{- tablerow (printf "%q" .bodyText) "" -}}
 {{- tablerow (printf "%q" "\n") "" -}}
 {{- end -}}
+{{- tablerow (printf "%q" (print "****** " "State" "::" .data.repository.pullRequest.state " ******")) -}}
 '
 
 query='
@@ -124,6 +125,10 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
     id
     createdAt
     pullRequest(number: $prnumber) {
+      state
+      mergedBy {
+        login
+      }
       files {
         totalCount
       }
