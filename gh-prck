@@ -71,9 +71,11 @@ template2='
 {{ end }}
 {{- tablerow (printf "%q" "") "" -}}
 
-{{- tablerow (printf "%q" "Files Changed") "" -}}
+{{- tablerow (printf "%q" (print "Files Changed::" .data.repository.pullRequest.files.totalCount)) -}}
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
-{{- tablerow (printf "%v" .data.repository.pullRequest.files.totalCount) "" -}}
+    {{- range $fi := .data.repository.pullRequest.files.nodes -}}
+        {{- tablerow (printf "%q" .path) -}}
+    {{ end }}
 {{- tablerow (printf "%q" "") "" -}}
 
 {{- range $rv := .data.repository.pullRequest.reviews.nodes -}} {{ tablerender }}
@@ -139,8 +141,11 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
       mergedBy {
         login
       }
-      files {
+      files(last: 10) {
         totalCount
+        nodes {
+          path
+        }
       }
       commits (last:30) {
         totalCount
