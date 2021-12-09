@@ -43,12 +43,24 @@ done
 shift $(($OPTIND - 1))
 
 template1='
-{{- tablerow (printf "%v" "PR Number") (printf "%v" "Author") (printf "%v" "State") (printf "%v" "MergedBy") (printf "%v" "Reviews") (printf "%v" "Commits") (printf "%v" "Comments") (printf "%v" "PR Title") -}}
+{{- tablerow (printf "%v" "PR Number") (printf "%v" "Author") (printf "%v"
+    "State") (printf "%v" "MergedBy") (printf "%v" "Reviews") (printf "%v"
+    "Commits") (printf "%v" "Comments") (printf "%v" "PR Title") (printf "%v"
+    "Labels") -}}
 {{- range $pr := .data.repository.pullRequests.nodes -}}
 {{ if .mergedBy }}
-{{- tablerow (printf "%v" .number|autocolor "red+bh") (printf "%v" .author.login|autocolor "blue+bh") (printf "%v" .state|autocolor "yellow+B") (printf "%v" .mergedBy.login ) (printf "%v" .reviews.totalCount) (printf "%v" .commits.totalCount) (printf "%v" .comments.totalCount) (printf "%v" .title| autocolor "green") -}}
+{{- tablerow (printf "%v" .number|autocolor "red+bh") (printf "%v"
+    .author.login|autocolor "blue+bh") (printf "%v" .state|autocolor "yellow+B")
+    (printf "%v" .mergedBy.login ) (printf "%v" .reviews.totalCount) (printf
+    "%v" .commits.totalCount) (printf "%v" .comments.totalCount) (printf "%v"
+    .title| autocolor "green") (.labels.nodes|pluck "name" |join ", "|printf
+    "%v"|autocolor "yellow") -}}
 {{ else }}
-{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v" .state) (printf "%v" "NotYetMerged") (printf "%v" .reviews.totalCount) (printf "%v" .commits.totalCount) (printf "%v" .comments.totalCount) (printf "%v" .title| autocolor "green") -}}
+{{- tablerow (printf "%v" .number) (printf "%v" .author.login) (printf "%v"
+    .state) (printf "%v" "NotYetMerged") (printf "%v" .reviews.totalCount)
+    (printf "%v" .commits.totalCount) (printf "%v" .comments.totalCount) (printf
+    "%v" .title| autocolor "green") (.labels.nodes|pluck "name"|join ", "|printf
+    "%v"|autocolor "yellow") -}}
 {{ end }}
 {{- end -}}
 '
@@ -103,6 +115,11 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
   repository(owner: $owner, name: $name) {
     pullRequests(last: $limit) {
       nodes {
+        labels(last: 10) {
+          nodes {
+            name
+          }
+        }
         suggestedReviewers {
           reviewer {
             name
@@ -132,6 +149,12 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
     id
     createdAt
     pullRequest(number: $prnumber) {
+      labels(last: 10) {
+        totalCount
+        nodes {
+          name
+        }
+      }
       suggestedReviewers {
         reviewer {
           name
