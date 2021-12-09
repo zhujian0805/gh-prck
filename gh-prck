@@ -109,7 +109,7 @@ template2='
 {{- tablerow (printf "%q" .bodyText) "" -}}
 {{- tablerow (printf "%q" "\n") "" -}}
 {{- end -}}
-{{- tablerow (printf "%q" (print "****** " "State" "::" .data.repository.pullRequest.state " ******")) -}}
+{{- tablerow (printf "%q" (print "****** " "State" "::" .data.repository.pullRequest.state "::" (.data.repository.pullRequest.labels.nodes|pluck "name"|join ",") "******")) -}}
 '
 
 query='
