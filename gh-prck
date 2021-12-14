@@ -43,9 +43,9 @@ done
 shift $(($OPTIND - 1))
 
 template1='
-{{- tablerow (printf "%v" "PR Number") (printf "%v" "Author") (printf "%v"
+{{- tablerow (printf "%v" "Number") (printf "%v" "Author") (printf "%v"
     "State") (printf "%v" "MergedBy") (printf "%v" "Reviews") (printf "%v"
-    "Commits") (printf "%v" "Comments") (printf "%v" "PR Title") (printf "%v"
+    "Commits") (printf "%v" "Comments") (printf "%v" "Title") (printf "%v"
     "Labels") -}}
 {{- range $pr := .data.repository.pullRequests.nodes -}}
 {{ if .mergedBy }}
