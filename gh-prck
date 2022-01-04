@@ -70,11 +70,14 @@ template2='
     (.data.repository.pullRequest.labels.nodes|pluck "name"|join ",") "******")) "" -}}
 {{- tablerow (printf "%q" "---------------------------------------------------------------------------") "" -}}
 {{ if .data.repository.pullRequest.title  }}
+{{- tablerow (printf "%q" .data.repository.pullRequest.url) }}
+{{- tablerow (printf "%q" "") "" -}}
 {{- tablerow (printf "%q" .data.repository.pullRequest.title) "" -}}
 {{- tablerow (printf "%q" "") "" -}}
 {{ end }}
 {{ if .data.repository.pullRequest.bodyText -}}
 {{- tablerow (printf "%q" .data.repository.pullRequest.bodyText) "" -}}
+{{- tablerow (printf "%q" .data.repository.pullRequest.url) }}
 {{- tablerow (printf "%q" "") "" -}}
 {{ end }}
 
@@ -151,6 +154,7 @@ query ($owner: String!, $name: String!, $prnumber: Int!, $limit: Int!) {
     id
     createdAt
     pullRequest(number: $prnumber) {
+      url
       labels(last: 10) {
         totalCount
         nodes {
